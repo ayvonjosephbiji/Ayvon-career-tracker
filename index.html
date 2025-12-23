@@ -1,0 +1,1035 @@
+import React, { useState } from 'react';
+import { Calendar, Plus, Trash2, Edit2, Save, X, ChevronDown, Lock, LogOut } from 'lucide-react';
+
+export default function CareerTracker() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+
+  const CORRECT_PASSWORD = '221928';
+
+  const handleLogin = () => {
+    if (passwordInput === CORRECT_PASSWORD) {
+      setIsLoggedIn(true);
+      setPasswordError('');
+      setPasswordInput('');
+    } else {
+      setPasswordError('❌ Incorrect password. Please try again.');
+      setPasswordInput('');
+    }
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setPasswordInput('');
+    setPasswordError('');
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleLogin();
+    }
+  };
+
+  // Diary State
+  const [diaryEntries, setDiaryEntries] = useState([
+    { 
+      id: 1, 
+      date: '2025-01-15', 
+      time: '14:30', 
+      title: 'Applied to Google UK', 
+      content: 'Submitted application for Senior Security Engineer role in London office. Great opportunity in their security team.',
+      category: 'Application'
+    }
+  ]);
+  const [diaryForm, setDiaryForm] = useState({ title: '', content: '', category: 'Application' });
+
+  // Jobs State
+  const [jobs, setJobs] = useState({
+    uk: [
+      { id: 1, company: 'Google', role: 'Senior Security Engineer', location: 'London', status: 'Applied', salary: '£80k-£120k', date: '2025-01-15', notes: 'Strong interest' },
+      { id: 2, company: 'Microsoft', role: 'Cloud Security Specialist', location: 'Manchester', status: 'Applied', salary: '£75k-£110k', date: '2025-01-14', notes: 'Pending response' },
+      { id: 3, company: 'Cisco', role: 'Penetration Tester', location: 'Cambridge', status: 'Interview', salary: '£70k-£100k', date: '2025-01-13', notes: 'First round completed' },
+      { id: 4, company: 'BT Group', role: 'Cybersecurity Analyst', location: 'London', status: 'Applied', salary: '£60k-£85k', date: '2025-01-12', notes: '' },
+      { id: 5, company: 'BAE Systems', role: 'Security Operations Manager', location: 'Warton', status: 'Pending', salary: '£85k-£125k', date: '2025-01-11', notes: 'Under review' },
+      { id: 6, company: 'Barclays', role: 'Information Security Officer', location: 'London', status: 'Applied', salary: '£75k-£115k', date: '2025-01-10', notes: '' },
+      { id: 7, company: 'GCHQ', role: 'Cyber Security Specialist', location: 'Cheltenham', status: 'Applied', salary: '£70k-£105k', date: '2025-01-09', notes: 'Government role' },
+      { id: 8, company: 'JPMorgan', role: 'Security Engineer', location: 'London', status: 'Interview', salary: '£90k-£140k', date: '2025-01-08', notes: 'Second round scheduled' },
+      { id: 9, company: 'Accenture', role: 'Cybersecurity Consultant', location: 'Manchester', status: 'Applied', salary: '£65k-£95k', date: '2025-01-07', notes: '' },
+      { id: 10, company: 'EY', role: 'Cyber Security Lead', location: 'London', status: 'Applied', salary: '£80k-£120k', date: '2025-01-06', notes: 'Team lead position' }
+    ],
+    india: [
+      { id: 11, company: 'TCS', role: 'Senior Security Consultant', location: 'Bangalore', status: 'Applied', salary: '₹20-28 LPA', date: '2025-01-15', notes: 'Major consulting firm' },
+      { id: 12, company: 'Infosys', role: 'Cybersecurity Specialist', location: 'Pune', status: 'Applied', salary: '₹18-25 LPA', date: '2025-01-14', notes: '' },
+      { id: 13, company: 'Wipro', role: 'IT Security Lead', location: 'Hyderabad', status: 'Interview', salary: '₹20-26 LPA', date: '2025-01-13', notes: 'First interview done' },
+      { id: 14, company: 'HCL Technologies', role: 'Security Operations Manager', location: 'Noida', status: 'Applied', salary: '₹22-30 LPA', date: '2025-01-12', notes: '' },
+      { id: 15, company: 'Cognizant', role: 'Cybersecurity Analyst', location: 'Bangalore', status: 'Applied', salary: '₹15-22 LPA', date: '2025-01-11', notes: '' },
+      { id: 16, company: 'Tech Mahindra', role: 'Information Security Officer', location: 'Pune', status: 'Applied', salary: '₹18-24 LPA', date: '2025-01-10', notes: '' },
+      { id: 17, company: 'IBM India', role: 'Cloud Security Engineer', location: 'Bangalore', status: 'Applied', salary: '₹20-28 LPA', date: '2025-01-09', notes: '' },
+      { id: 18, company: 'Deloitte India', role: 'Cyber Risk Consultant', location: 'Mumbai', status: 'Interview', salary: '₹22-32 LPA', date: '2025-01-08', notes: 'Consulting role' },
+      { id: 19, company: 'Capgemini', role: 'Security Architect', location: 'Bangalore', status: 'Applied', salary: '₹25-35 LPA', date: '2025-01-07', notes: '' },
+      { id: 20, company: 'Flipkart', role: 'IT Security Specialist', location: 'Bangalore', status: 'Applied', salary: '₹20-28 LPA', date: '2025-01-06', notes: 'E-commerce major' }
+    ]
+  });
+  const [jobForm, setJobForm] = useState({ company: '', role: '', location: '', status: 'Applied', salary: '', date: '', notes: '', region: 'uk' });
+
+  // Programs State
+  const [programs, setPrograms] = useState([
+    { id: 1, name: 'MSc Cybersecurity', university: 'University of Edinburgh', country: 'UK', status: 'Applied', deadline: '2025-03-15', fees: '£25,000', type: 'Master\'s' },
+    { id: 2, name: 'PhD Computer Science (Security Focus)', university: 'Imperial College London', country: 'UK', status: 'Pending', deadline: '2025-04-30', fees: '£10,000/year', type: 'PhD' },
+    { id: 3, name: 'MTech Information Security', university: 'IIT Delhi', country: 'India', status: 'Applied', deadline: '2025-05-20', fees: '₹2,50,000', type: 'Master\'s' }
+  ]);
+  const [programForm, setProgrogramForm] = useState({ name: '', university: '', country: 'UK', status: 'Pending', deadline: '', fees: '', type: 'Master\'s' });
+
+  // Goals State
+  const [goals, setGoals] = useState([
+    { id: 1, goal: 'Secure at least 3 interviews in UK', progress: 2, target: 3, category: 'Interview', dueDate: '2025-03-31' },
+    { id: 2, goal: 'Complete 10 UK job applications', progress: 10, target: 10, category: 'Application', dueDate: '2025-02-15', completed: true },
+    { id: 3, goal: 'Complete 10 India job applications', progress: 10, target: 10, category: 'Application', dueDate: '2025-02-20', completed: true },
+    { id: 4, goal: 'Secure Master\'s admission', progress: 1, target: 1, category: 'Education', dueDate: '2025-06-30' },
+    { id: 5, goal: 'Complete CISSP certification', progress: 50, target: 100, category: 'Certification', dueDate: '2025-12-31' }
+  ]);
+  const [goalForm, setGoalForm] = useState({ goal: '', progress: 0, target: 10, category: 'Application', dueDate: '' });
+
+  // Diary Functions
+  const addDiaryEntry = () => {
+    if (diaryForm.title.trim()) {
+      const now = new Date();
+      if (editingId) {
+        setDiaryEntries(diaryEntries.map(e => e.id === editingId ? { ...e, ...diaryForm } : e));
+        setEditingId(null);
+      } else {
+        setDiaryEntries([{
+          id: Date.now(),
+          date: now.toISOString().split('T')[0],
+          time: now.toTimeString().slice(0, 5),
+          ...diaryForm
+        }, ...diaryEntries]);
+      }
+      setDiaryForm({ title: '', content: '', category: 'Application' });
+      setShowForm(false);
+    }
+  };
+
+  const deleteDiary = (id) => {
+    setDiaryEntries(diaryEntries.filter(e => e.id !== id));
+  };
+
+  const editDiary = (entry) => {
+    setDiaryForm({ title: entry.title, content: entry.content, category: entry.category });
+    setEditingId(entry.id);
+    setShowForm(true);
+  };
+
+  // Job Functions
+  const addJob = () => {
+    if (jobForm.company.trim() && jobForm.role.trim()) {
+      if (editingId) {
+        const region = jobForm.region || 'uk';
+        setJobs({
+          ...jobs,
+          [region]: jobs[region].map(j => j.id === editingId ? { ...j, ...jobForm } : j)
+        });
+        setEditingId(null);
+      } else {
+        const region = jobForm.region || 'uk';
+        const newJob = {
+          id: Date.now(),
+          ...jobForm,
+        };
+        setJobs({
+          ...jobs,
+          [region]: [newJob, ...jobs[region]]
+        });
+      }
+      setJobForm({ company: '', role: '', location: '', status: 'Applied', salary: '', date: '', notes: '', region: 'uk' });
+      setShowForm(false);
+    }
+  };
+
+  const deleteJob = (id, region) => {
+    setJobs({
+      ...jobs,
+      [region]: jobs[region].filter(j => j.id !== id)
+    });
+  };
+
+  const editJob = (job, region) => {
+    setJobForm({ ...job, region });
+    setEditingId(job.id);
+    setShowForm(true);
+  };
+
+  // Program Functions
+  const addProgram = () => {
+    if (programForm.name.trim() && programForm.university.trim()) {
+      if (editingId) {
+        setPrograms(programs.map(p => p.id === editingId ? { ...p, ...programForm } : p));
+        setEditingId(null);
+      } else {
+        setPrograms([{ id: Date.now(), ...programForm }, ...programs]);
+      }
+      setProgrogramForm({ name: '', university: '', country: 'UK', status: 'Pending', deadline: '', fees: '', type: 'Master\'s' });
+      setShowForm(false);
+    }
+  };
+
+  const deleteProgram = (id) => {
+    setPrograms(programs.filter(p => p.id !== id));
+  };
+
+  const editProgram = (program) => {
+    setProgrogramForm(program);
+    setEditingId(program.id);
+    setShowForm(true);
+  };
+
+  // Goal Functions
+  const addGoal = () => {
+    if (goalForm.goal.trim()) {
+      if (editingId) {
+        setGoals(goals.map(g => g.id === editingId ? { ...g, ...goalForm } : g));
+        setEditingId(null);
+      } else {
+        setGoals([{ id: Date.now(), ...goalForm, completed: false }, ...goals]);
+      }
+      setGoalForm({ goal: '', progress: 0, target: 10, category: 'Application', dueDate: '' });
+      setShowForm(false);
+    }
+  };
+
+  const deleteGoal = (id) => {
+    setGoals(goals.filter(g => g.id !== id));
+  };
+
+  const editGoal = (goal) => {
+    setGoalForm(goal);
+    setEditingId(goal.id);
+    setShowForm(true);
+  };
+
+  const toggleGoalCompletion = (id) => {
+    setGoals(goals.map(g => g.id === id ? { ...g, completed: !g.completed } : g));
+  };
+
+  // Statistics
+  const ukApplied = jobs.uk.filter(j => j.status === 'Applied').length;
+  const ukInterviews = jobs.uk.filter(j => j.status === 'Interview').length;
+  const indiaApplied = jobs.india.filter(j => j.status === 'Applied').length;
+  const indiaInterviews = jobs.india.filter(j => j.status === 'Interview').length;
+
+  const getFormTitle = () => {
+    if (activeTab === 'diary') return editingId ? 'Edit Diary Entry' : 'New Diary Entry';
+    if (activeTab === 'uk-jobs' || activeTab === 'india-jobs') return editingId ? 'Edit Job Application' : 'Add Job Application';
+    if (activeTab === 'programs') return editingId ? 'Edit Program' : 'Add Program';
+    if (activeTab === 'goals') return editingId ? 'Edit Goal' : 'Add Goal';
+  };
+
+  // LOGIN PAGE
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' }}>
+        {/* Background Animation */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
+        </div>
+
+        {/* Login Card */}
+        <div className="relative z-10 w-full max-w-md px-6">
+          <div className="bg-gray-900/80 backdrop-blur-xl border border-cyan-500/30 rounded-2xl shadow-2xl p-8 space-y-8">
+            {/* Logo */}
+            <div className="text-center space-y-4">
+              <div className="flex justify-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-xl flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform">
+                  <Lock className="w-8 h-8 text-white" />
+                </div>
+              </div>
+              <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500" style={{ fontFamily: 'Georgia, serif' }}>
+                Ayvon
+              </h1>
+              <p className="text-gray-400 text-lg font-semibold">Career Navigator</p>
+              <p className="text-gray-500 text-sm">Secure Access Required</p>
+            </div>
+
+            {/* Password Input */}
+            <div className="space-y-3">
+              <label className="block text-gray-300 text-sm font-semibold">
+                🔐 Password
+              </label>
+              <input
+                type="password"
+                placeholder="Enter password"
+                value={passwordInput}
+                onChange={(e) => setPasswordInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className="w-full bg-gray-800/50 border border-cyan-500/30 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 focus:bg-gray-800/70 transition-all"
+                autoFocus
+              />
+              {passwordError && (
+                <p className="text-red-400 text-sm font-semibold animate-pulse">{passwordError}</p>
+              )}
+            </div>
+
+            {/* Login Button */}
+            <button
+              onClick={handleLogin}
+              className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold py-3 rounded-lg transition-all transform hover:scale-105 active:scale-95 shadow-lg flex items-center justify-center gap-2"
+            >
+              <Lock className="w-5 h-5" />
+              Unlock Dashboard
+            </button>
+
+            {/* Footer */}
+            <div className="text-center text-gray-500 text-xs">
+              <p>🔒 Password Protected System</p>
+              <p className="mt-2">Ayvon Career Navigator © 2026</p>
+            </div>
+          </div>
+
+          {/* Security Message */}
+          <div className="mt-8 text-center">
+            <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-lg px-4 py-3">
+              <p className="text-cyan-400 text-sm">✓ Secure Connection • Your data is protected</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // MAIN APP
+  return (
+    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)' }}>
+      {/* Header */}
+      <div className="sticky top-0 z-50 backdrop-blur-md bg-black/30 border-b border-cyan-500/20">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-lg flex items-center justify-center font-bold text-white">ACN</div>
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Georgia, serif' }}>Ayvon Career Navigator</h1>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 px-4 py-2 rounded-lg transition-all border border-red-500/30"
+            >
+              <LogOut className="w-4 h-4" />
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation Tabs */}
+      <div className="border-b border-cyan-500/20 bg-black/20 sticky top-16 z-40">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex gap-8 overflow-x-auto">
+            {[
+              { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+              { id: 'diary', label: 'Diary', icon: '📔' },
+              { id: 'uk-jobs', label: 'UK Jobs', icon: '🇬🇧' },
+              { id: 'india-jobs', label: 'India Jobs', icon: '🇮🇳' },
+              { id: 'programs', label: 'Programs', icon: '🎓' },
+              { id: 'goals', label: 'Goals', icon: '🎯' }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-4 py-4 font-semibold border-b-2 whitespace-nowrap transition-all ${
+                  activeTab === tab.id
+                    ? 'border-cyan-400 text-cyan-400'
+                    : 'border-transparent text-gray-400 hover:text-cyan-300'
+                }`}
+              >
+                <span className="mr-2">{tab.icon}</span>{tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Modal Form */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-gray-900 border border-cyan-500/30 rounded-lg max-w-2xl w-full max-h-96 overflow-y-auto">
+            <div className="sticky top-0 bg-black/60 border-b border-cyan-500/30 px-6 py-4 flex justify-between items-center">
+              <h2 className="text-xl font-bold text-white">{getFormTitle()}</h2>
+              <button onClick={() => { setShowForm(false); setEditingId(null); }} className="text-gray-400 hover:text-white">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {/* Diary Form */}
+              {activeTab === 'diary' && (
+                <>
+                  <div>
+                    <label className="block text-gray-300 text-sm font-semibold mb-2">Title</label>
+                    <input
+                      type="text"
+                      placeholder="Entry title..."
+                      value={diaryForm.title}
+                      onChange={(e) => setDiaryForm({ ...diaryForm, title: e.target.value })}
+                      className="w-full bg-gray-800/50 border border-gray-600 rounded px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-300 text-sm font-semibold mb-2">Category</label>
+                    <select
+                      value={diaryForm.category}
+                      onChange={(e) => setDiaryForm({ ...diaryForm, category: e.target.value })}
+                      className="w-full bg-gray-800/50 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-cyan-400"
+                    >
+                      <option>Application</option>
+                      <option>Interview</option>
+                      <option>Study</option>
+                      <option>Reflection</option>
+                      <option>Progress</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-gray-300 text-sm font-semibold mb-2">Content</label>
+                    <textarea
+                      placeholder="Write your thoughts..."
+                      value={diaryForm.content}
+                      onChange={(e) => setDiaryForm({ ...diaryForm, content: e.target.value })}
+                      rows="3"
+                      className="w-full bg-gray-800/50 border border-gray-600 rounded px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400"
+                    />
+                  </div>
+                  <button
+                    onClick={addDiaryEntry}
+                    className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold py-2 rounded transition-all"
+                  >
+                    {editingId ? 'Update Entry' : 'Add Entry'}
+                  </button>
+                </>
+              )}
+
+              {/* Job Form */}
+              {(activeTab === 'uk-jobs' || activeTab === 'india-jobs') && (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-gray-300 text-sm font-semibold mb-2">Company</label>
+                      <input
+                        type="text"
+                        placeholder="Company name"
+                        value={jobForm.company}
+                        onChange={(e) => setJobForm({ ...jobForm, company: e.target.value })}
+                        className="w-full bg-gray-800/50 border border-gray-600 rounded px-4 py-2 text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-300 text-sm font-semibold mb-2">Role</label>
+                      <input
+                        type="text"
+                        placeholder="Job role"
+                        value={jobForm.role}
+                        onChange={(e) => setJobForm({ ...jobForm, role: e.target.value })}
+                        className="w-full bg-gray-800/50 border border-gray-600 rounded px-4 py-2 text-white"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-gray-300 text-sm font-semibold mb-2">Location</label>
+                      <input
+                        type="text"
+                        placeholder="City/Region"
+                        value={jobForm.location}
+                        onChange={(e) => setJobForm({ ...jobForm, location: e.target.value })}
+                        className="w-full bg-gray-800/50 border border-gray-600 rounded px-4 py-2 text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-300 text-sm font-semibold mb-2">Salary Range</label>
+                      <input
+                        type="text"
+                        placeholder="£70k-100k or ₹20-28 LPA"
+                        value={jobForm.salary}
+                        onChange={(e) => setJobForm({ ...jobForm, salary: e.target.value })}
+                        className="w-full bg-gray-800/50 border border-gray-600 rounded px-4 py-2 text-white"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-gray-300 text-sm font-semibold mb-2">Status</label>
+                      <select
+                        value={jobForm.status}
+                        onChange={(e) => setJobForm({ ...jobForm, status: e.target.value })}
+                        className="w-full bg-gray-800/50 border border-gray-600 rounded px-4 py-2 text-white"
+                      >
+                        <option>Applied</option>
+                        <option>Interview</option>
+                        <option>Offer</option>
+                        <option>Rejected</option>
+                        <option>Pending</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-gray-300 text-sm font-semibold mb-2">Application Date</label>
+                      <input
+                        type="date"
+                        value={jobForm.date}
+                        onChange={(e) => setJobForm({ ...jobForm, date: e.target.value })}
+                        className="w-full bg-gray-800/50 border border-gray-600 rounded px-4 py-2 text-white"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-gray-300 text-sm font-semibold mb-2">Notes</label>
+                    <textarea
+                      placeholder="Additional notes..."
+                      value={jobForm.notes}
+                      onChange={(e) => setJobForm({ ...jobForm, notes: e.target.value })}
+                      rows="2"
+                      className="w-full bg-gray-800/50 border border-gray-600 rounded px-4 py-2 text-white"
+                    />
+                  </div>
+                  <button
+                    onClick={addJob}
+                    className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold py-2 rounded"
+                  >
+                    {editingId ? 'Update Job' : 'Add Job'}
+                  </button>
+                </>
+              )}
+
+              {/* Program Form */}
+              {activeTab === 'programs' && (
+                <>
+                  <div>
+                    <label className="block text-gray-300 text-sm font-semibold mb-2">Program Name</label>
+                    <input
+                      type="text"
+                      placeholder="e.g., MSc Cybersecurity"
+                      value={programForm.name}
+                      onChange={(e) => setProgrogramForm({ ...programForm, name: e.target.value })}
+                      className="w-full bg-gray-800/50 border border-gray-600 rounded px-4 py-2 text-white"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-gray-300 text-sm font-semibold mb-2">University</label>
+                      <input
+                        type="text"
+                        placeholder="University name"
+                        value={programForm.university}
+                        onChange={(e) => setProgrogramForm({ ...programForm, university: e.target.value })}
+                        className="w-full bg-gray-800/50 border border-gray-600 rounded px-4 py-2 text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-300 text-sm font-semibold mb-2">Type</label>
+                      <select
+                        value={programForm.type}
+                        onChange={(e) => setProgrogramForm({ ...programForm, type: e.target.value })}
+                        className="w-full bg-gray-800/50 border border-gray-600 rounded px-4 py-2 text-white"
+                      >
+                        <option>Master's</option>
+                        <option>PhD</option>
+                        <option>Diploma</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-gray-300 text-sm font-semibold mb-2">Country</label>
+                      <select
+                        value={programForm.country}
+                        onChange={(e) => setProgrogramForm({ ...programForm, country: e.target.value })}
+                        className="w-full bg-gray-800/50 border border-gray-600 rounded px-4 py-2 text-white"
+                      >
+                        <option>UK</option>
+                        <option>India</option>
+                        <option>USA</option>
+                        <option>Canada</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-gray-300 text-sm font-semibold mb-2">Deadline</label>
+                      <input
+                        type="date"
+                        value={programForm.deadline}
+                        onChange={(e) => setProgrogramForm({ ...programForm, deadline: e.target.value })}
+                        className="w-full bg-gray-800/50 border border-gray-600 rounded px-4 py-2 text-white"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-gray-300 text-sm font-semibold mb-2">Fees</label>
+                    <input
+                      type="text"
+                      placeholder="£25,000 or ₹2,50,000"
+                      value={programForm.fees}
+                      onChange={(e) => setProgrogramForm({ ...programForm, fees: e.target.value })}
+                      className="w-full bg-gray-800/50 border border-gray-600 rounded px-4 py-2 text-white"
+                    />
+                  </div>
+                  <button
+                    onClick={addProgram}
+                    className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold py-2 rounded"
+                  >
+                    {editingId ? 'Update Program' : 'Add Program'}
+                  </button>
+                </>
+              )}
+
+              {/* Goal Form */}
+              {activeTab === 'goals' && (
+                <>
+                  <div>
+                    <label className="block text-gray-300 text-sm font-semibold mb-2">Goal</label>
+                    <input
+                      type="text"
+                      placeholder="What do you want to achieve?"
+                      value={goalForm.goal}
+                      onChange={(e) => setGoalForm({ ...goalForm, goal: e.target.value })}
+                      className="w-full bg-gray-800/50 border border-gray-600 rounded px-4 py-2 text-white"
+                    />
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-gray-300 text-sm font-semibold mb-2">Category</label>
+                      <select
+                        value={goalForm.category}
+                        onChange={(e) => setGoalForm({ ...goalForm, category: e.target.value })}
+                        className="w-full bg-gray-800/50 border border-gray-600 rounded px-4 py-2 text-white"
+                      >
+                        <option>Application</option>
+                        <option>Interview</option>
+                        <option>Education</option>
+                        <option>Certification</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-gray-300 text-sm font-semibold mb-2">Progress</label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={goalForm.progress}
+                        onChange={(e) => setGoalForm({ ...goalForm, progress: parseInt(e.target.value) })}
+                        className="w-full bg-gray-800/50 border border-gray-600 rounded px-4 py-2 text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-300 text-sm font-semibold mb-2">Target</label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={goalForm.target}
+                        onChange={(e) => setGoalForm({ ...goalForm, target: parseInt(e.target.value) })}
+                        className="w-full bg-gray-800/50 border border-gray-600 rounded px-4 py-2 text-white"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-gray-300 text-sm font-semibold mb-2">Due Date</label>
+                    <input
+                      type="date"
+                      value={goalForm.dueDate}
+                      onChange={(e) => setGoalForm({ ...goalForm, dueDate: e.target.value })}
+                      className="w-full bg-gray-800/50 border border-gray-600 rounded px-4 py-2 text-white"
+                    />
+                  </div>
+                  <button
+                    onClick={addGoal}
+                    className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold py-2 rounded"
+                  >
+                    {editingId ? 'Update Goal' : 'Add Goal'}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Content */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Dashboard */}
+        {activeTab === 'dashboard' && (
+          <div className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-gradient-to-br from-blue-600/20 to-blue-900/20 border border-blue-400/30 rounded-lg p-6">
+                <div className="text-blue-400 text-sm font-semibold mb-2">UK APPLICATIONS</div>
+                <div className="text-3xl font-bold text-white">{jobs.uk.length}</div>
+                <div className="text-xs text-gray-400 mt-2">{ukInterviews} interviews</div>
+              </div>
+              <div className="bg-gradient-to-br from-orange-600/20 to-orange-900/20 border border-orange-400/30 rounded-lg p-6">
+                <div className="text-orange-400 text-sm font-semibold mb-2">INDIA APPLICATIONS</div>
+                <div className="text-3xl font-bold text-white">{jobs.india.length}</div>
+                <div className="text-xs text-gray-400 mt-2">{indiaInterviews} interviews</div>
+              </div>
+              <div className="bg-gradient-to-br from-purple-600/20 to-purple-900/20 border border-purple-400/30 rounded-lg p-6">
+                <div className="text-purple-400 text-sm font-semibold mb-2">PROGRAMS</div>
+                <div className="text-3xl font-bold text-white">{programs.length}</div>
+                <div className="text-xs text-gray-400 mt-2">Master's & PhD</div>
+              </div>
+              <div className="bg-gradient-to-br from-green-600/20 to-green-900/20 border border-green-400/30 rounded-lg p-6">
+                <div className="text-green-400 text-sm font-semibold mb-2">GOALS</div>
+                <div className="text-3xl font-bold text-white">{goals.length}</div>
+                <div className="text-xs text-gray-400 mt-2">{goals.filter(g => g.completed).length} completed</div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="bg-black/40 border border-cyan-500/20 rounded-lg p-8">
+                <h2 className="text-xl font-bold text-white mb-6">Application Overview</h2>
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span className="text-gray-300">🇬🇧 UK Applied</span>
+                      <span className="text-cyan-400 font-semibold">{ukApplied}/{jobs.uk.length}</span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2">
+                      <div className="bg-gradient-to-r from-blue-400 to-cyan-400 h-2 rounded-full" style={{ width: `${(ukApplied/jobs.uk.length)*100}%` }}></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span className="text-gray-300">🇮🇳 India Applied</span>
+                      <span className="text-orange-400 font-semibold">{indiaApplied}/{jobs.india.length}</span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2">
+                      <div className="bg-gradient-to-r from-orange-400 to-red-400 h-2 rounded-full" style={{ width: `${(indiaApplied/jobs.india.length)*100}%` }}></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-black/40 border border-cyan-500/20 rounded-lg p-8">
+                <h2 className="text-xl font-bold text-white mb-6">Interview Progress</h2>
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-yellow-400">{ukInterviews + indiaInterviews}</div>
+                    <div className="text-gray-400 text-sm">Total Interviews Scheduled</div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 mt-6">
+                    <div className="bg-gray-800/50 rounded p-3 text-center">
+                      <div className="text-yellow-400 font-bold">UK: {ukInterviews}</div>
+                    </div>
+                    <div className="bg-gray-800/50 rounded p-3 text-center">
+                      <div className="text-yellow-400 font-bold">India: {indiaInterviews}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Diary */}
+        {activeTab === 'diary' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-white">📔 Diary & Notes</h2>
+              <button
+                onClick={() => { setShowForm(true); setEditingId(null); setDiaryForm({ title: '', content: '', category: 'Application' }); }}
+                className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold px-6 py-2 rounded flex items-center gap-2 transition-all"
+              >
+                <Plus className="w-5 h-5" /> New Entry
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {diaryEntries.length === 0 ? (
+                <div className="bg-black/40 border border-cyan-500/20 rounded-lg p-8 text-center">
+                  <p className="text-gray-400">No diary entries yet. Add one to get started!</p>
+                </div>
+              ) : (
+                diaryEntries.map(entry => (
+                  <div key={entry.id} className="bg-black/40 border border-cyan-500/20 rounded-lg p-6 hover:border-cyan-400/50 transition-all">
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex-1">
+                        <div className="flex gap-3 items-center mb-2">
+                          <h3 className="text-lg font-bold text-white">{entry.title}</h3>
+                          <span className="text-xs bg-cyan-500/20 text-cyan-400 px-3 py-1 rounded-full">{entry.category}</span>
+                        </div>
+                        <div className="flex gap-4 text-sm text-gray-400">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4" /> {entry.date}
+                          </span>
+                          <span>⏰ {entry.time}</span>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => editDiary(entry)}
+                          className="text-blue-400 hover:text-blue-300 transition-colors"
+                        >
+                          <Edit2 className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => deleteDiary(entry.id)}
+                          className="text-red-400 hover:text-red-300 transition-colors"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+                    <p className="text-gray-300">{entry.content}</p>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* UK Jobs */}
+        {activeTab === 'uk-jobs' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-white">🇬🇧 UK Jobs ({jobs.uk.length}/10)</h2>
+              <button
+                onClick={() => { setShowForm(true); setEditingId(null); setJobForm({ company: '', role: '', location: '', status: 'Applied', salary: '', date: '', notes: '', region: 'uk' }); }}
+                className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold px-6 py-2 rounded flex items-center gap-2"
+              >
+                <Plus className="w-5 h-5" /> Add Job
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4">
+              {jobs.uk.map(job => (
+                <div key={job.id} className="bg-black/40 border border-blue-500/20 rounded-lg p-6 hover:border-blue-400/50 transition-all">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-white">{job.role}</h3>
+                      <p className="text-blue-400 font-semibold mt-1">{job.company}</p>
+                      <div className="flex gap-4 text-sm text-gray-400 mt-2">
+                        <span>📍 {job.location}</span>
+                        {job.salary && <span>💷 {job.salary}</span>}
+                        {job.date && <span>📅 {job.date}</span>}
+                      </div>
+                      {job.notes && <p className="text-gray-300 text-sm mt-2">📝 {job.notes}</p>}
+                    </div>
+                    <div className="flex flex-col gap-2 items-end">
+                      <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                        job.status === 'Applied' ? 'bg-green-500/20 text-green-400' :
+                        job.status === 'Interview' ? 'bg-yellow-500/20 text-yellow-400' :
+                        job.status === 'Offer' ? 'bg-blue-500/20 text-blue-400' :
+                        job.status === 'Rejected' ? 'bg-red-500/20 text-red-400' :
+                        'bg-gray-500/20 text-gray-400'
+                      }`}>
+                        {job.status}
+                      </span>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => editJob(job, 'uk')}
+                          className="text-blue-400 hover:text-blue-300 transition-colors p-1"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => deleteJob(job.id, 'uk')}
+                          className="text-red-400 hover:text-red-300 transition-colors p-1"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* India Jobs */}
+        {activeTab === 'india-jobs' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-white">🇮🇳 India Jobs ({jobs.india.length}/10)</h2>
+              <button
+                onClick={() => { setShowForm(true); setEditingId(null); setJobForm({ company: '', role: '', location: '', status: 'Applied', salary: '', date: '', notes: '', region: 'india' }); }}
+                className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold px-6 py-2 rounded flex items-center gap-2"
+              >
+                <Plus className="w-5 h-5" /> Add Job
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4">
+              {jobs.india.map(job => (
+                <div key={job.id} className="bg-black/40 border border-orange-500/20 rounded-lg p-6 hover:border-orange-400/50 transition-all">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-white">{job.role}</h3>
+                      <p className="text-orange-400 font-semibold mt-1">{job.company}</p>
+                      <div className="flex gap-4 text-sm text-gray-400 mt-2">
+                        <span>📍 {job.location}</span>
+                        {job.salary && <span>💰 {job.salary}</span>}
+                        {job.date && <span>📅 {job.date}</span>}
+                      </div>
+                      {job.notes && <p className="text-gray-300 text-sm mt-2">📝 {job.notes}</p>}
+                    </div>
+                    <div className="flex flex-col gap-2 items-end">
+                      <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                        job.status === 'Applied' ? 'bg-green-500/20 text-green-400' :
+                        job.status === 'Interview' ? 'bg-yellow-500/20 text-yellow-400' :
+                        job.status === 'Offer' ? 'bg-blue-500/20 text-blue-400' :
+                        job.status === 'Rejected' ? 'bg-red-500/20 text-red-400' :
+                        'bg-gray-500/20 text-gray-400'
+                      }`}>
+                        {job.status}
+                      </span>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => editJob(job, 'india')}
+                          className="text-blue-400 hover:text-blue-300 transition-colors p-1"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => deleteJob(job.id, 'india')}
+                          className="text-red-400 hover:text-red-300 transition-colors p-1"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Programs */}
+        {activeTab === 'programs' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-white">🎓 Programs ({programs.length})</h2>
+              <button
+                onClick={() => { setShowForm(true); setEditingId(null); setProgrogramForm({ name: '', university: '', country: 'UK', status: 'Pending', deadline: '', fees: '', type: 'Master\'s' }); }}
+                className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold px-6 py-2 rounded flex items-center gap-2"
+              >
+                <Plus className="w-5 h-5" /> Add Program
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4">
+              {programs.map(prog => (
+                <div key={prog.id} className="bg-black/40 border border-purple-500/20 rounded-lg p-6 hover:border-purple-400/50 transition-all">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-white">{prog.name}</h3>
+                      <p className="text-purple-400 font-semibold mt-1">{prog.university}</p>
+                      <div className="flex gap-4 text-sm text-gray-400 mt-2">
+                        <span>📍 {prog.country}</span>
+                        <span>🎯 {prog.type}</span>
+                        {prog.deadline && <span>📅 {prog.deadline}</span>}
+                        {prog.fees && <span>💰 {prog.fees}</span>}
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-2 items-end">
+                      <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                        prog.status === 'Applied' ? 'bg-blue-500/20 text-blue-400' :
+                        'bg-yellow-500/20 text-yellow-400'
+                      }`}>
+                        {prog.status}
+                      </span>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => editProgram(prog)}
+                          className="text-blue-400 hover:text-blue-300 transition-colors p-1"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => deleteProgram(prog.id)}
+                          className="text-red-400 hover:text-red-300 transition-colors p-1"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Goals */}
+        {activeTab === 'goals' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-white">🎯 Goals & Targets</h2>
+              <button
+                onClick={() => { setShowForm(true); setEditingId(null); setGoalForm({ goal: '', progress: 0, target: 10, category: 'Application', dueDate: '' }); }}
+                className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold px-6 py-2 rounded flex items-center gap-2"
+              >
+                <Plus className="w-5 h-5" /> New Goal
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4">
+              {goals.map(goal => (
+                <div key={goal.id} className="bg-black/40 border border-cyan-500/20 rounded-lg p-6 hover:border-cyan-400/50 transition-all">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex-1">
+                      <div className="flex gap-3 items-center mb-2">
+                        <h3 className="text-lg font-bold text-white">{goal.goal}</h3>
+                        {goal.completed && <span className="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs font-semibold">✓</span>}
+                      </div>
+                      <div className="flex gap-4 text-sm text-gray-400 mb-4">
+                        <span>{goal.category}</span>
+                        {goal.dueDate && <span>📅 {goal.dueDate}</span>}
+                      </div>
+                      <div className="flex items-center justify-between text-sm text-gray-400 mb-2">
+                        <span className="text-white font-semibold">{goal.progress}/{goal.target}</span>
+                        <span>{Math.round((goal.progress/goal.target)*100)}%</span>
+                      </div>
+                      <div className="w-full bg-gray-700 rounded-full h-3">
+                        <div
+                          className="bg-gradient-to-r from-cyan-400 to-blue-400 h-3 rounded-full transition-all"
+                          style={{ width: `${(goal.progress/goal.target)*100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <button
+                        onClick={() => toggleGoalCompletion(goal.id)}
+                        className={`px-3 py-1 rounded text-sm font-semibold transition-all ${
+                          goal.completed 
+                            ? 'bg-green-500/20 text-green-400' 
+                            : 'bg-gray-600/50 text-gray-300 hover:bg-gray-600'
+                        }`}
+                      >
+                        {goal.completed ? 'Done' : 'Active'}
+                      </button>
+                      <button
+                        onClick={() => editGoal(goal)}
+                        className="text-blue-400 hover:text-blue-300 transition-colors p-1"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => deleteGoal(goal.id)}
+                        className="text-red-400 hover:text-red-300 transition-colors p-1"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="border-t border-cyan-500/20 bg-black/20 mt-16 py-8">
+        <div className="max-w-7xl mx-auto px-4 text-center text-gray-400 text-sm">
+          <p>Ayvon Career Navigator © 2026 | Complete Job & Academic Tracker for Cybersecurity Professionals</p>
+        </div>
+      </div>
+    </div>
+  );
+}
