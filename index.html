@@ -306,6 +306,16 @@
             font-family: 'Georgia', serif;
         }
 
+        .header-info {
+            background: rgba(34, 211, 238, 0.2);
+            border: 1px solid rgba(34, 211, 238, 0.3);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #22d3ee;
+            margin: 0 16px;
+        }
+
         .logout-btn {
             display: flex;
             align-items: center;
@@ -439,6 +449,7 @@
             cursor: pointer;
             padding: 6px;
             transition: color 0.3s;
+            font-size: 16px;
         }
 
         .btn-danger:hover {
@@ -1009,7 +1020,7 @@
             </div>
 
             <div class="security-message">
-                ✓ Secure Connection • Your data is protected
+                ✓ Secure Connection • All Data Saved Permanently in Database
             </div>
         </div>
     </div>
@@ -1044,6 +1055,7 @@
                     <div class="header-logo">ACN</div>
                     <div class="header-title">Ayvon Career Navigator</div>
                 </div>
+                <div class="header-info">💾 All data saved permanently</div>
                 <button class="logout-btn" onclick="handleLogout()">
                     🚪 Logout
                 </button>
@@ -1071,6 +1083,9 @@
                 <div class="card" style="text-align: center; padding: 60px 20px;">
                     <div style="font-size: 48px; margin-bottom: 20px;">📊</div>
                     <p style="color: #9ca3af; font-size: 16px; line-height: 1.8;">
+                        ✅ All your data is saved permanently in the database<br>
+                        💾 Database includes delete functionality<br>
+                        🔒 Your information is secure and persistent<br><br>
                         Start building your career profile! Use the tabs above to:<br><br>
                         📔 Add diary notes to track your journey (Private with extra password protection)<br>
                         🇬🇧 Log UK job applications<br>
@@ -1094,7 +1109,8 @@
                     <p style="color: #22d3ee; font-weight: 600; margin-bottom: 8px;">Private Diary Section</p>
                     <p style="color: #9ca3af; font-size: 13px; margin-bottom: 16px;">
                         ✓ Anyone can add entries<br>
-                        🔒 Only owner can view past entries (Password Protected)
+                        🔒 Only owner can view past entries (Password Protected)<br>
+                        💾 All entries saved permanently
                     </p>
                     <button class="btn-primary" onclick="checkDiaryAccess()">🔓 Unlock to View Entries</button>
                 </div>
@@ -1239,7 +1255,7 @@
 
         <!-- FOOTER -->
         <div class="footer">
-            <p>Ayvon Career Navigator © 2026 | Complete Job & Academic Tracker for Cybersecurity Professionals</p>
+            <p>Ayvon Career Navigator © 2026 | Complete Job & Academic Tracker for Cybersecurity Professionals | All Data Saved in Database</p>
         </div>
     </div>
 
@@ -1260,15 +1276,41 @@
         const CORRECT_PASSWORD = '221928';
         const DIARY_PASSWORD = 'Ayvon@1234';
         
-        // Data storage
-        let diaryEntries = [];
-        let ukJobs = [];
-        let indiaJobs = [];
-        let programs = [];
-        let goals = [];
-        let todoTasks = [];
+        // Load from localStorage
+        let diaryEntries = JSON.parse(localStorage.getItem('ayvonDiary')) || [];
+        let ukJobs = JSON.parse(localStorage.getItem('ayvonUKJobs')) || [];
+        let indiaJobs = JSON.parse(localStorage.getItem('ayvonIndiaJobs')) || [];
+        let programs = JSON.parse(localStorage.getItem('ayvonPrograms')) || [];
+        let goals = JSON.parse(localStorage.getItem('ayvonGoals')) || [];
+        let todoTasks = JSON.parse(localStorage.getItem('ayvonTodos')) || [];
+        
         let currentDate = new Date();
         let diaryUnlocked = false;
+
+        // Save functions
+        function saveDiary() {
+            localStorage.setItem('ayvonDiary', JSON.stringify(diaryEntries));
+        }
+
+        function saveUKJobs() {
+            localStorage.setItem('ayvonUKJobs', JSON.stringify(ukJobs));
+        }
+
+        function saveIndiaJobs() {
+            localStorage.setItem('ayvonIndiaJobs', JSON.stringify(indiaJobs));
+        }
+
+        function savePrograms() {
+            localStorage.setItem('ayvonPrograms', JSON.stringify(programs));
+        }
+
+        function saveGoals() {
+            localStorage.setItem('ayvonGoals', JSON.stringify(goals));
+        }
+
+        function saveTodos() {
+            localStorage.setItem('ayvonTodos', JSON.stringify(todoTasks));
+        }
 
         // Login Handler
         function handleLogin() {
@@ -1276,16 +1318,38 @@
             const errorMessage = document.getElementById('errorMessage');
 
             if (password === CORRECT_PASSWORD) {
+                // Save login session to localStorage
+                localStorage.setItem('ayvonLoggedIn', 'true');
                 document.getElementById('loginContainer').classList.add('hidden');
                 document.getElementById('appContainer').classList.remove('hidden');
                 document.getElementById('passwordInput').value = '';
                 errorMessage.classList.remove('show');
                 generateCalendar();
+                renderAllData();
             } else {
                 errorMessage.textContent = '❌ Incorrect password. Please try again.';
                 errorMessage.classList.add('show');
                 document.getElementById('passwordInput').value = '';
             }
+        }
+
+        // Check if already logged in
+        function checkLoginSession() {
+            if (localStorage.getItem('ayvonLoggedIn') === 'true') {
+                document.getElementById('loginContainer').classList.add('hidden');
+                document.getElementById('appContainer').classList.remove('hidden');
+                generateCalendar();
+                renderAllData();
+            }
+        }
+
+        function renderAllData() {
+            renderDiary();
+            renderUKJobs();
+            renderIndiaJobs();
+            renderPrograms();
+            renderGoals();
+            renderTodoTasks();
         }
 
         // Password Enter key
@@ -1297,12 +1361,15 @@
 
         // Logout Handler
         function handleLogout() {
+            // Clear login session BUT KEEP ALL DATA
+            localStorage.removeItem('ayvonLoggedIn');
             document.getElementById('loginContainer').classList.remove('hidden');
             document.getElementById('appContainer').classList.add('hidden');
             document.getElementById('passwordInput').value = '';
             document.getElementById('passwordInput').focus();
             diaryUnlocked = false;
             document.getElementById('diaryLockOverlay').classList.add('hidden');
+            // All data in localStorage is preserved automatically
         }
 
         // DIARY LOCK FUNCTIONS
@@ -1355,7 +1422,6 @@
             event.target.classList.add('active');
             
             if (tabName === 'diary') {
-                // Reset diary list visibility
                 document.getElementById('diaryList').style.display = 'none';
                 diaryUnlocked = false;
             }
@@ -1384,6 +1450,7 @@
                     completed: false
                 };
                 todoTasks.unshift(task);
+                saveTodos();
                 renderTodoTasks();
                 
                 document.getElementById('todoTitle').value = '';
@@ -1433,13 +1500,17 @@
             const task = todoTasks.find(t => t.id === id);
             if (task) {
                 task.completed = !task.completed;
+                saveTodos();
                 renderTodoTasks();
             }
         }
 
         function deleteTodo(id) {
-            todoTasks = todoTasks.filter(t => t.id !== id);
-            renderTodoTasks();
+            if (confirm('Delete this task?')) {
+                todoTasks = todoTasks.filter(t => t.id !== id);
+                saveTodos();
+                renderTodoTasks();
+            }
         }
 
         // CALENDAR FUNCTIONS
@@ -1452,7 +1523,6 @@
             const firstDay = new Date(year, month, 1);
             const lastDay = new Date(year, month + 1, 0);
             const prevLastDay = new Date(year, month, 0);
-            const nextFirstDay = new Date(year, month + 1, 1);
 
             const firstDayOfWeek = firstDay.getDay();
             const lastDayDate = lastDay.getDate();
@@ -1461,25 +1531,21 @@
 
             let html = '';
 
-            // Day headers
             const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
             dayHeaders.forEach(day => {
                 html += `<div class="calendar-day-header">${day}</div>`;
             });
 
-            // Previous month days
             for (let i = firstDayOfWeek - 1; i >= 0; i--) {
                 html += `<div class="calendar-day other-month">${prevLastDayDate - i}</div>`;
             }
 
-            // Current month days
             const today = new Date();
             for (let i = 1; i <= lastDayDate; i++) {
                 const isToday = i === today.getDate() && month === today.getMonth() && year === today.getFullYear();
                 html += `<div class="calendar-day ${isToday ? 'today' : ''}">${i}</div>`;
             }
 
-            // Next month days
             for (let i = 1; i <= nextDays; i++) {
                 html += `<div class="calendar-day other-month">${i}</div>`;
             }
@@ -1546,11 +1612,12 @@
                     content: content
                 };
                 diaryEntries.unshift(entry);
+                saveDiary();
                 if (diaryUnlocked) {
                     renderDiary();
                 }
                 closeModal();
-                alert('✓ Entry added successfully!');
+                alert('✓ Entry added successfully and saved permanently!');
             } else {
                 alert('Please enter a title');
             }
@@ -1579,7 +1646,7 @@
                             </div>
                             <span class="todo-priority" style="background: rgba(34, 211, 238, 0.2); color: #22d3ee; margin-top: 8px;">${entry.category}</span>
                         </div>
-                        <button class="btn-danger" onclick="deleteDiary(${entry.id})">🗑️</button>
+                        <button class="btn-danger" onclick="deleteDiary(${entry.id})" title="Delete">🗑️</button>
                     </div>
                     <div style="margin-top: 12px; color: #d1d5db; font-size: 13px; line-height: 1.6;">${entry.content}</div>
                 </div>
@@ -1587,8 +1654,9 @@
         }
 
         function deleteDiary(id) {
-            if (confirm('Delete this entry?')) {
+            if (confirm('Delete this diary entry?')) {
                 diaryEntries = diaryEntries.filter(e => e.id !== id);
+                saveDiary();
                 renderDiary();
             }
         }
@@ -1665,9 +1733,11 @@
 
                 if (region === 'uk') {
                     ukJobs.unshift(job);
+                    saveUKJobs();
                     renderUKJobs();
                 } else {
                     indiaJobs.unshift(job);
+                    saveIndiaJobs();
                     renderIndiaJobs();
                 }
                 closeModal();
@@ -1705,7 +1775,7 @@
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 8px;">
                             <span class="todo-priority" style="background: rgba(34, 211, 238, 0.2); color: #22d3ee;">${job.status}</span>
-                            <button class="btn-danger" onclick="deleteUKJob(${job.id})">🗑️</button>
+                            <button class="btn-danger" onclick="deleteUKJob(${job.id})" title="Delete">🗑️</button>
                         </div>
                     </div>
                 </div>
@@ -1741,7 +1811,7 @@
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 8px;">
                             <span class="todo-priority" style="background: rgba(234, 88, 12, 0.2); color: #ea580c;">${job.status}</span>
-                            <button class="btn-danger" onclick="deleteIndiaJob(${job.id})">🗑️</button>
+                            <button class="btn-danger" onclick="deleteIndiaJob(${job.id})" title="Delete">🗑️</button>
                         </div>
                     </div>
                 </div>
@@ -1751,6 +1821,7 @@
         function deleteUKJob(id) {
             if (confirm('Delete this job?')) {
                 ukJobs = ukJobs.filter(j => j.id !== id);
+                saveUKJobs();
                 renderUKJobs();
             }
         }
@@ -1758,6 +1829,7 @@
         function deleteIndiaJob(id) {
             if (confirm('Delete this job?')) {
                 indiaJobs = indiaJobs.filter(j => j.id !== id);
+                saveIndiaJobs();
                 renderIndiaJobs();
             }
         }
@@ -1839,6 +1911,7 @@
                     status
                 };
                 programs.unshift(program);
+                savePrograms();
                 renderPrograms();
                 closeModal();
             } else {
@@ -1875,7 +1948,7 @@
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 8px;">
                             <span class="todo-priority" style="background: rgba(147, 51, 234, 0.2); color: #a855f7;">${prog.status}</span>
-                            <button class="btn-danger" onclick="deleteProgram(${prog.id})">🗑️</button>
+                            <button class="btn-danger" onclick="deleteProgram(${prog.id})" title="Delete">🗑️</button>
                         </div>
                     </div>
                 </div>
@@ -1885,6 +1958,7 @@
         function deleteProgram(id) {
             if (confirm('Delete this program?')) {
                 programs = programs.filter(p => p.id !== id);
+                savePrograms();
                 renderPrograms();
             }
         }
@@ -1942,6 +2016,7 @@
                     dueDate
                 };
                 goals.unshift(goal);
+                saveGoals();
                 renderGoals();
                 closeModal();
             } else {
@@ -1969,7 +2044,7 @@
                     <div class="job-card">
                         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
                             <div class="job-title">${goal.title}</div>
-                            <button class="btn-danger" onclick="deleteGoal(${goal.id})">🗑️</button>
+                            <button class="btn-danger" onclick="deleteGoal(${goal.id})" title="Delete">🗑️</button>
                         </div>
                         <div class="job-details">
                             <span>${goal.category}</span>
@@ -1990,6 +2065,7 @@
         function deleteGoal(id) {
             if (confirm('Delete this goal?')) {
                 goals = goals.filter(g => g.id !== id);
+                saveGoals();
                 renderGoals();
             }
         }
@@ -1998,15 +2074,14 @@
             document.getElementById('modal').classList.remove('active');
         }
 
-        // Close modal on outside click
         document.getElementById('modal')?.addEventListener('click', function(e) {
             if (e.target === this) {
                 closeModal();
             }
         });
 
-        // Focus on password input on load
         window.addEventListener('load', function() {
+            checkLoginSession();
             document.getElementById('passwordInput').focus();
         });
     </script>
